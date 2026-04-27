@@ -16,7 +16,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 
 /**
- * Main class of the application. Managing routing and HTTP layer.
+ * Main class of the applicfffation. Managing routing and HTTP layer.
  */
 public class Application {
 

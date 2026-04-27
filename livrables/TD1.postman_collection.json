@@ -1,0 +1,74 @@
+{
+	"info": {
+		"_postman_id": "e4df86c3-83cc-43f3-a8d6-4d6d2c07eb68",
+		"name": "TD1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "54344132",
+		"_collection_link": "https://freednel-gbaguidi5-6279710.postman.co/workspace/Freed-GB's-Workspace~3be41725-8bfd-4648-8cca-bd703c05b87c/collection/54344132-e4df86c3-83cc-43f3-a8d6-4d6d2c07eb68?action=share&source=collection_link&creator=54344132"
+	},
+	"item": [
+		{
+			"name": "GET /tasks",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "GET /tasks/{id}",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/tasks",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /tasks/{id}",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /tasks/{id}",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Me reposer\",\n  \"description\": \"Me détendre avec un bonne sieste\",\n  \"done\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/tasks/2",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"tasks",
+						"2"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

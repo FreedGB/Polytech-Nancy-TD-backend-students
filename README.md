@@ -78,7 +78,7 @@ Liens :
 
 ### Étape 3 — Appeler le endpoint **GET /tasks/{id}** avec **Postman**
 - Créez une requête **GET** vers `http://localhost:8080/tasks/1`. Appelez cette requête `GET /tasks/{id}`.
-- Créer une **Collection** « Cours initiation dev WEB » pour y ranger vos requêtes.
+- Créer une **Collsfsfection** « Cours initiation dev WEB » pour y ranger vos requêtes.
 - (Bonus) Ajoutez une variable `{{baseUrl}} = http://localhost:8080` pour avoir une configuration dynamique. Créer un environnement `local` et initialiser la nouvelle variable.
 
 ---

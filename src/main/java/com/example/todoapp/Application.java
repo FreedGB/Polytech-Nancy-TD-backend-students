@@ -23,6 +23,7 @@ public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     private static final Pattern ID_PATH = Pattern.compile("^/tasks/([0-9]+)$");
     private static final TaskDao dao = new TaskDao();
+    private static final TaskDao test = new TaskDao();
 
     public static void main(String[] args) throws Exception {
         log.info("In-memory repository initialised");

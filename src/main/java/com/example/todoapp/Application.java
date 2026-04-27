@@ -64,25 +64,38 @@ public class Application {
                 else {
                     sendResponse(exchange, 200, JsonUtils.serialize(taskList));
                 }
+                return;
             }
             //endregion
         }
 
 
-        //region Manage GET /tasks/{id}
+        // Manage /tasks/{id}
         Matcher m = ID_PATH.matcher(path);
-        if ("GET".equals(method) && m.matches()) {
+        if (m.matches()) {
             int id = Integer.parseInt(m.group(1));
             Optional<Task> task = dao.findById(id);
 
-            if (task.isPresent()) {
-                sendResponse(exchange, 200, JsonUtils.serialize(task.get()));
-            } else {
+            if (task.isEmpty()) {
                 sendResponse(exchange, 404, null);
+                return;
             }
-            return;
-        }
-        //endregion
+
+            //region Manage GET /tasks/{id}
+            if ("GET".equals(method)) {
+                sendResponse(exchange, 200, JsonUtils.serialize(task.get()));
+                return;
+            }
+            //endregion
+
+            //region Manage DELETE /tasks/{id}
+            if ("DELETE".equals(method)){
+                dao.deleteTaskById(id);
+                sendResponse(exchange, 204, null);
+                return;
+            }
+            //endregion
+            }
 
         // Otherwise → 404
         sendResponse(exchange, 404, null);

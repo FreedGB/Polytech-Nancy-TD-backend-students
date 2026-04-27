@@ -56,4 +56,12 @@ public class TaskDao {
 
         return tasksList;
     }
+
+    /**
+     * Remove a {@link Task} by its id
+     * @param id identifier of the {@link Task}.
+     */
+    public void deleteTaskById(int id) {
+        storage.remove(id);
+    }
 }

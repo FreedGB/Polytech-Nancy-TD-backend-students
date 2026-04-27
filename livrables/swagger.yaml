@@ -90,7 +90,7 @@ paths:
             description: Supprimer une tâche par son identifiant
             operationId: deleteTaskById
             responses:
-                '200':
+                '204':
                     description: Tâche supprimée avec succès
                 '404':
                     description: Tâche non trouvée

@@ -64,4 +64,12 @@ public class TaskDao {
     public void deleteTaskById(int id) {
         storage.remove(id);
     }
+
+    /**
+     * Update a {@link Task} by its id
+     * @param id identifier of the {@link Task}.
+     */
+    public void updateTaskById(int id, String title, String description, boolean done) {
+        storage.replace(id, new Task(id, title, description, done));
+    }
 }

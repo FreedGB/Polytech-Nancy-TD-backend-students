@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +38,7 @@ public class Application {
     private static void handleTasks(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
+        String query = exchange.getRequestURI().getQuery();
 
         //region Manage POST /tasks
         if ("POST".equals(method) && "/tasks".equals(path)) {
@@ -46,6 +48,20 @@ public class Application {
             exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());
             sendResponse(exchange, 201, JsonUtils.serialize(createdTask));
             return;
+        }
+        //endregion
+
+        //region Manage GET /tasks
+        if ("GET".equals(method) && "/tasks".equals(path)) {
+            boolean todoOnly = query.equals("todo-only=true");
+            Collection<Task> taskList = dao.getTasksList(todoOnly);
+
+            if (taskList.isEmpty()) {
+                sendResponse(exchange, 204, null);
+            }
+            else {
+                sendResponse(exchange, 200, JsonUtils.serialize(taskList));
+            }
         }
         //endregion
 

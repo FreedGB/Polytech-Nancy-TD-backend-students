@@ -1,8 +1,6 @@
 package com.example.todoapp;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Data Access Object for {@link Task} model.
@@ -34,5 +32,28 @@ public class TaskDao {
      */
     public Optional<Task> findById(int id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    /**
+     * Retrieve the list of all {@link Task}s.
+     * @return {@link Task} collection
+     */
+    public Collection<Task> getTasksList(boolean todoOnly) {
+        Collection<Task> tasksList = new ArrayList<>();
+
+        for (Task task : storage.values()) {
+            if (todoOnly) {
+                // So we only add not done tasks
+                if (!task.done()) {
+                    tasksList.add(task);
+                }
+            }
+            else {
+                // We add all of them
+                tasksList.add(task);
+            }
+        }
+
+        return tasksList;
     }
 }

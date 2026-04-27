@@ -40,30 +40,34 @@ public class Application {
         String path = exchange.getRequestURI().getPath();
         String query = exchange.getRequestURI().getQuery();
 
-        //region Manage POST /tasks
-        if ("POST".equals(method) && "/tasks".equals(path)) {
-            Task input = JsonUtils.deserialize(new String(exchange.getRequestBody().readAllBytes(), UTF_8), Task.class);
-            Task createdTask = dao.save(input);
+        //Manage /tasks
+        if ("/tasks".equals(path)) {
+            //region Manage POST /tasks
+            if("POST".equals(method)) {
+                Task input = JsonUtils.deserialize(new String(exchange.getRequestBody().readAllBytes(), UTF_8), Task.class);
+                Task createdTask = dao.save(input);
 
-            exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());
-            sendResponse(exchange, 201, JsonUtils.serialize(createdTask));
-            return;
-        }
-        //endregion
-
-        //region Manage GET /tasks
-        if ("GET".equals(method) && "/tasks".equals(path)) {
-            boolean todoOnly = query.equals("todo-only=true");
-            Collection<Task> taskList = dao.getTasksList(todoOnly);
-
-            if (taskList.isEmpty()) {
-                sendResponse(exchange, 204, null);
+                exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());
+                sendResponse(exchange, 201, JsonUtils.serialize(createdTask));
+                return;
             }
-            else {
-                sendResponse(exchange, 200, JsonUtils.serialize(taskList));
+            //endregion
+
+            //region Manage GET /tasks
+            if ("GET".equals(method)) {
+                boolean todoOnly = query.equals("todo-only=true");
+                Collection<Task> taskList = dao.getTasksList(todoOnly);
+
+                if (taskList.isEmpty()) {
+                    sendResponse(exchange, 204, null);
+                }
+                else {
+                    sendResponse(exchange, 200, JsonUtils.serialize(taskList));
+                }
             }
+            //endregion
         }
-        //endregion
+
 
         //region Manage GET /tasks/{id}
         Matcher m = ID_PATH.matcher(path);

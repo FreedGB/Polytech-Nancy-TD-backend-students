@@ -1,5 +1,8 @@
 package com.example.todoapp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 /**
@@ -7,6 +10,7 @@ import java.util.*;
  */
 public class TaskDao {
 
+    private static final Logger log = LoggerFactory.getLogger(TaskDao.class);
     private final Map<Integer, Task> storage = new HashMap<>();
 
     {
@@ -71,5 +75,13 @@ public class TaskDao {
      */
     public void updateTaskById(int id, String title, String description, boolean done) {
         storage.replace(id, new Task(id, title, description, done));
+    }
+
+    /**
+     * Update a {@link Task} by its id
+     * @return {@link int} next id available in the storage.
+     */
+    public int calculateNextId() {
+        return storage.keySet().stream().mapToInt(Integer::intValue).max().orElse(0) + 1; // Id handled by backend instead of frontend
     }
 }

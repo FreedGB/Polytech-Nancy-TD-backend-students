@@ -1,5 +1,6 @@
-package com.example.todoapp;
+package com.example.todoapp.dao;
 
+import com.example.todoapp.business.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class TaskDao {
     }
 
     /**
-     * Update a {@link Task} by its id
+     * Get the next id available in the database
      * @return {@link int} next id available in the storage.
      */
     public int calculateNextId() {

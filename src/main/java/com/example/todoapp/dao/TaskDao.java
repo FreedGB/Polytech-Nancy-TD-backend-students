@@ -4,6 +4,7 @@ import com.example.todoapp.business.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -12,9 +13,34 @@ import java.util.*;
 public class TaskDao {
 
     private static final Logger log = LoggerFactory.getLogger(TaskDao.class);
-    private final Map<Integer, Task> storage = new HashMap<>();
+    private final String databaseURL = "JDBC:sqlite:task_database.db";
 
-    {
+    public TaskDao () {
+        try {
+            createTableIfNotExists();
+            initializeTable();
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    public void createTableIfNotExists() throws SQLException {
+        String sql = """
+                        CREATE TABLE IF NOT EXISTS Tasks (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            title VARCHAR(20) NOT NULL,
+                            description VARCHAR(255),
+                            done BOOL
+                        );""";
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.execute();
+            statement.close();
+        }
+    }
+
+    public void initializeTable() {
         save(new Task(1, "Réviser DS de maths", "Séries numériques et probabilités.", false));
         save(new Task(2, "Valider mon PIVE", "PIVE Club Poker.", true));
         save(new Task(3, "Choisir mon parcours de 4A", "SIR ou SIA ?", false));
@@ -26,7 +52,20 @@ public class TaskDao {
      * @return task model.
      */
     public Task save(Task task) {
-        storage.put(task.id(), task);
+        String sql = """
+                        INSERT INTO Tasks (title, description, done)
+                        VALUES (?, ?, ?);""";
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, task.title());
+            statement.setString(2, task.description());
+            statement.setBoolean(3, task.done());
+            statement.execute();
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+
         return task;
     }
 
@@ -36,7 +75,22 @@ public class TaskDao {
      * @return {@link Task} model wrapped by Optional.
      */
     public Optional<Task> findById(int id) {
-        return Optional.ofNullable(storage.get(id));
+        String sql = """
+                        SELECT *
+                        FROM Tasks
+                        WHERE id = ?;
+                     """;
+        Optional<Task> task = Optional.empty();
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            task = buildTaskModel(rs);
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return task;
     }
 
     /**
@@ -46,17 +100,25 @@ public class TaskDao {
     public Collection<Task> getTasksList(boolean todoOnly) {
         Collection<Task> tasksList = new ArrayList<>();
 
-        for (Task task : storage.values()) {
-            if (todoOnly) {
-                // So we only add not done tasks
-                if (!task.done()) {
-                    tasksList.add(task);
-                }
+        String sql;
+
+        if (todoOnly) {
+            sql = "SELECT * FROM Tasks WHERE done = true";
+        }
+        else {
+            sql = "SELECT * FROM Tasks;";
+        }
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery();
+
+            while (rs.next()) {
+                tasksList.add(buildTaskModel(rs).get());
             }
-            else {
-                // We add all of them
-                tasksList.add(task);
-            }
+
+        } catch (SQLException e) {
+            log.error(e.getMessage());
         }
 
         return tasksList;
@@ -67,7 +129,19 @@ public class TaskDao {
      * @param id identifier of the {@link Task}.
      */
     public void deleteTaskById(int id) {
-        storage.remove(id);
+        String sql = """
+                        DELETE *
+                        FROM Tasks
+                        WHERE id = ?;
+                     """;
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            statement.executeQuery();
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
     }
 
     /**
@@ -75,14 +149,32 @@ public class TaskDao {
      * @param id identifier of the {@link Task}.
      */
     public void updateTaskById(int id, String title, String description, boolean done) {
-        storage.replace(id, new Task(id, title, description, done));
+        String sql = """
+                        UPDATE Tasks
+                        SET title = ?, description = ?, done = ?
+                        WHERE id = ?;
+                     """;
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setInt(1, id);
+            statement.setString(1, title);
+            statement.setString(2, description);
+            statement.setBoolean(3, done);
+            statement.executeQuery();
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
     }
 
-    /**
-     * Get the next id available in the database
-     * @return {@link int} next id available in the storage.
-     */
-    public int calculateNextId() {
-        return storage.keySet().stream().mapToInt(Integer::intValue).max().orElse(0) + 1; // id handled by backend instead of frontend
+    public Optional<Task> buildTaskModel(ResultSet rs) throws SQLException{
+        Task task = new Task(
+                rs.getInt("id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getBoolean("done")
+        );
+
+        return Optional.of(task);
     }
 }

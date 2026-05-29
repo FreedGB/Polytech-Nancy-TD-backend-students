@@ -11,8 +11,7 @@ public class TaskService {
     private final TaskDao taskDao = new TaskDao();
 
     public Task createTask(Task input) {
-        int newId = this.taskDao.calculateNextId();
-        Task newTask = new Task(newId, input.title(), input.description(), input.done());
+        Task newTask = new Task(input.id(), input.title(), input.description(), input.done());
         return this.taskDao.save(newTask);
     }
 

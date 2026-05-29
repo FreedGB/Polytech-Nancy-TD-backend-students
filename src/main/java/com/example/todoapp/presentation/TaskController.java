@@ -18,7 +18,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 
 public class TaskController implements HttpHandler {
-    private TaskService taskService = new TaskService();
+    private final TaskService taskService = new TaskService();
     private static final Pattern ID_PATH = Pattern.compile("^/tasks/([0-9]+)$");
 
 
@@ -108,8 +108,6 @@ public class TaskController implements HttpHandler {
 
         // Otherwise → 404
         sendResponse(exchange, 404, null);
-
-        return;
     }
 
     private static void sendResponse(HttpExchange exchange, int status, String json) throws IOException {

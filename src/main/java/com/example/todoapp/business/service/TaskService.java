@@ -8,14 +8,12 @@ import java.util.Optional;
 
 public class TaskService {
 
-    private TaskDao taskDao = new TaskDao();
+    private final TaskDao taskDao = new TaskDao();
 
     public Task createTask(Task input) {
         int newId = this.taskDao.calculateNextId();
         Task newTask = new Task(newId, input.title(), input.description(), input.done());
-        Task createdTask = this.taskDao.save(newTask);
-
-        return createdTask;
+        return this.taskDao.save(newTask);
     }
 
     public Optional<Task> getTaskById(int id) {
@@ -31,7 +29,6 @@ public class TaskService {
     }
 
     public Collection<Task> getTasksList(boolean todoOnly) {
-        Collection<Task> tasksList = this.taskDao.getTasksList(todoOnly);
-        return tasksList;
+        return this.taskDao.getTasksList(todoOnly);
     }
 }

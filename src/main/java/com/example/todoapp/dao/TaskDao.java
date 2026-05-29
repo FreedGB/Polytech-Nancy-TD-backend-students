@@ -83,6 +83,6 @@ public class TaskDao {
      * @return {@link int} next id available in the storage.
      */
     public int calculateNextId() {
-        return storage.keySet().stream().mapToInt(Integer::intValue).max().orElse(0) + 1; // Id handled by backend instead of frontend
+        return storage.keySet().stream().mapToInt(Integer::intValue).max().orElse(0) + 1; // id handled by backend instead of frontend
     }
 }

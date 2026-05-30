@@ -4,6 +4,7 @@ import com.example.todoapp.JsonUtils;
 import com.example.todoapp.business.model.Task;
 import com.example.todoapp.business.service.TaskService;
 import com.example.todoapp.dto.TaskErrorDTO;
+import com.example.todoapp.dto.TaskGetDTO;
 import com.example.todoapp.dto.TaskPostDTO;
 import com.example.todoapp.dto.TaskPutDTO;
 import com.sun.net.httpserver.HttpExchange;
@@ -71,13 +72,13 @@ public class TaskController implements HttpHandler {
             //region Manage GET /tasks
             if ("GET".equals(method)) {
                 boolean todoOnly = query.equals("todo-only=true");
-                Collection<Task> taskList = this.taskService.getTasksList(todoOnly);
+                Collection<TaskGetDTO> output = this.taskService.getTasksList(todoOnly);
 
-                if (taskList.isEmpty()) {
+                if (output.isEmpty()) {
                     sendResponse(exchange, 204, null);
                 }
                 else {
-                    sendResponse(exchange, 200, JsonUtils.serialize(taskList));
+                    sendResponse(exchange, 200, JsonUtils.serialize(output));
                 }
                 return;
             }
@@ -90,16 +91,16 @@ public class TaskController implements HttpHandler {
 
         if (m.matches()) {
             int id = Integer.parseInt(m.group(1));
-            Optional<Task> task = this.taskService.getTaskById(id);
+            Optional<TaskGetDTO> output = this.taskService.getTaskById(id);
 
-            if (task.isEmpty()) {
+            if (output.isEmpty()) {
                 sendResponse(exchange, 404, null);
                 return;
             }
 
             //region Manage GET /tasks/{id}
             if ("GET".equals(method)) {
-                sendResponse(exchange, 200, JsonUtils.serialize(task.get()));
+                sendResponse(exchange, 200, JsonUtils.serialize(output));
                 return;
             }
             //endregion
@@ -129,7 +130,7 @@ public class TaskController implements HttpHandler {
                     sendResponse(exchange, 400, JsonUtils.serialize(error));
                 }
 
-                if ( input.description() !=null && input.description().length() > 255 ) {
+                if ( input.description() != null && input.description().length() > 255 ) {
                     TaskErrorDTO error = new TaskErrorDTO("description", "Description should not exceed 255 characters.");
                     sendResponse(exchange, 400, JsonUtils.serialize(error));
                 }

@@ -5,6 +5,7 @@ import com.example.todoapp.business.model.Task;
 import com.example.todoapp.business.service.TaskService;
 import com.example.todoapp.dto.TaskErrorDTO;
 import com.example.todoapp.dto.TaskPostDTO;
+import com.example.todoapp.dto.TaskPutDTO;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -116,8 +117,24 @@ public class TaskController implements HttpHandler {
                 InputStream bodyStream = exchange.getRequestBody();
                 String body = new String(bodyStream.readAllBytes());
 
-                Task updatedTask = JsonUtils.deserialize(body, Task.class);
-                this.taskService.updateTaskById(id, updatedTask.title(), updatedTask.description(), updatedTask.done());
+                TaskPutDTO input = JsonUtils.deserialize(body, TaskPutDTO.class);
+
+                if (input.title() == null || input.title().isEmpty()) {
+                    TaskErrorDTO error = new TaskErrorDTO("title", "Title should not be empty.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
+                if (input.title() != null && input.title().length() > 50) {
+                    TaskErrorDTO error = new TaskErrorDTO("title", "Title should not exceed 50 characters.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
+                if ( input.description() !=null && input.description().length() > 255 ) {
+                    TaskErrorDTO error = new TaskErrorDTO("description", "Description should not exceed 255 characters.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
+                this.taskService.updateTaskById(id, input.title(), input.description(), input.done());
                 sendResponse(exchange, 204, null);
                 return;
             }

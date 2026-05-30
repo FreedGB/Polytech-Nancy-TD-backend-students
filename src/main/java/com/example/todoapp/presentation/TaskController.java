@@ -1,10 +1,9 @@
 package com.example.todoapp.presentation;
 
 import com.example.todoapp.JsonUtils;
-import com.example.todoapp.business.model.Task;
 import com.example.todoapp.business.service.TaskService;
 import com.example.todoapp.dto.TaskErrorDTO;
-import com.example.todoapp.dto.TaskGetDTO;
+import com.example.todoapp.dto.TaskOutputDTO;
 import com.example.todoapp.dto.TaskPostDTO;
 import com.example.todoapp.dto.TaskPutDTO;
 import com.sun.net.httpserver.HttpExchange;
@@ -61,7 +60,7 @@ public class TaskController implements HttpHandler {
                     sendResponse(exchange, 400, JsonUtils.serialize(error));
                 }
 
-                Task createdTask = this.taskService.createTask(input);
+                TaskOutputDTO createdTask = this.taskService.createTask(input);
 
                 exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());
                 sendResponse(exchange, 201, JsonUtils.serialize(createdTask));
@@ -72,7 +71,7 @@ public class TaskController implements HttpHandler {
             //region Manage GET /tasks
             if ("GET".equals(method)) {
                 boolean todoOnly = query.equals("todo-only=true");
-                Collection<TaskGetDTO> output = this.taskService.getTasksList(todoOnly);
+                Collection<TaskOutputDTO> output = this.taskService.getTasksList(todoOnly);
 
                 if (output.isEmpty()) {
                     sendResponse(exchange, 204, null);
@@ -91,7 +90,7 @@ public class TaskController implements HttpHandler {
 
         if (m.matches()) {
             int id = Integer.parseInt(m.group(1));
-            Optional<TaskGetDTO> output = this.taskService.getTaskById(id);
+            Optional<TaskOutputDTO> output = this.taskService.getTaskById(id);
 
             if (output.isEmpty()) {
                 sendResponse(exchange, 404, null);

@@ -23,7 +23,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/Task'
+                            $ref: '#/components/schemas/TaskPostDTO'
             responses:
                 '201':
                     description: Tâche créée avec succès
@@ -36,18 +36,18 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Task'
-        parameters:
-            - in: query
-              name: todo-only
-              required: false
-              description: Indique s'il faut seulement récupérer les tâches à réaliser.
-              schema:
-                  type: boolean
+                                $ref: '#/components/schemas/TaskOutputDTO'
         get:
             tags: [ tasks ]
             summary: Récupère l'ensemble des tâches.
             operationId: getTasksList
+            parameters:
+                - in: query
+                  name: todo-only
+                  required: true
+                  description: Indique s'il faut seulement récupérer les tâches à réaliser.
+                  schema:
+                      type: boolean
             responses:
                 '200':
                     description: Tâches trouvées
@@ -56,7 +56,7 @@ paths:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/Task'
+                                    $ref: '#/components/schemas/TaskOutputDTO'
 
                 '204':
                     description: Pas de résultats
@@ -81,9 +81,27 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/Task'
+                                $ref: '#/components/schemas/TaskOutputDTO'
                 '404':
                     description: Tâche non trouvée
+
+        put:
+            tags: [ tasks ]
+            summary: Modifie une tâche.
+            description: Modifie une tâche à partir d’un JSON.
+            operationId: updateTaskById
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TaskPutDTO'
+            responses:
+                '204':
+                    description: Tâche modifiée avec succès
+                '404':
+                    description: Tâche non trouvée
+
         delete:
             tags: [ tasks ]
             summary: Supprimer une tâche
@@ -94,21 +112,11 @@ paths:
                     description: Tâche supprimée avec succès
                 '404':
                     description: Tâche non trouvée
-        put:
-            tags: [ tasks ]
-            summary: Modifie une tâche.
-            description: Modifie une tâche à partir d’un JSON.
-            operationId: updateTaskById
-            responses:
-                '204':
-                    description: Tâche modifiée avec succès
-                '404':
-                    description: Tâche non trouvée
 components:
     schemas:
-        Task:
+        TaskOutputDTO:
             type: object
-            description: Représentation d'une tâche
+            description: Représentation d'une tâche reçue du serveur.
             properties:
                 id:
                     type: integer
@@ -128,3 +136,41 @@ components:
             required:
                 - id
                 - title
+                - description
+                - done
+
+        TaskPostDTO:
+            type: object
+            description: Représentation d'une tâche à envoyer au serveur.
+            properties:
+                title:
+                    type: string
+                    nullable: false
+                    example: Acheter du lait
+                description:
+                    type: string
+                    nullable: true
+                    example: 2L demi-écrémé
+            required:
+                - title
+
+        TaskPutDTO:
+            type: object
+            description: Représentation d'une tâche à modifier par serveur.
+            properties:
+                title:
+                    type: string
+                    nullable: false
+                    example: Acheter du lait
+                description:
+                    type: string
+                    nullable: true
+                    example: 2L demi-écrémé
+                done:
+                    type: boolean
+                    nullable: false
+                    example: false
+            required:
+                - title
+                - description
+                - done

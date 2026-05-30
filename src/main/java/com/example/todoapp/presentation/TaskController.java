@@ -3,6 +3,7 @@ package com.example.todoapp.presentation;
 import com.example.todoapp.JsonUtils;
 import com.example.todoapp.business.model.Task;
 import com.example.todoapp.business.service.TaskService;
+import com.example.todoapp.dto.TaskPostDTO;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -40,7 +41,7 @@ public class TaskController implements HttpHandler {
         if ("/tasks".equals(path)) {
             //region Manage POST /tasks
             if("POST".equals(method)) {
-                Task input = JsonUtils.deserialize(new String(exchange.getRequestBody().readAllBytes(), UTF_8), Task.class);
+                TaskPostDTO input = JsonUtils.deserialize(new String(exchange.getRequestBody().readAllBytes(), UTF_8), TaskPostDTO.class);
                 Task createdTask = this.taskService.createTask(input);
 
                 exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());

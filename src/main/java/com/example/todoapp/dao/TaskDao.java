@@ -1,6 +1,7 @@
 package com.example.todoapp.dao;
 
 import com.example.todoapp.business.model.Task;
+import com.example.todoapp.dto.TaskPostDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ public class TaskDao {
     public TaskDao () {
         try {
             createTableIfNotExists();
+            clearTable();
             initializeTable();
         } catch (SQLException e) {
             log.error(e.getMessage());
@@ -30,7 +32,8 @@ public class TaskDao {
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             title VARCHAR(20) NOT NULL,
                             description VARCHAR(255),
-                            done BOOL
+                            done BOOL,
+                            UNIQUE(title, description, done)
                         );""";
 
         try (Connection connection = DriverManager.getConnection(databaseURL)){
@@ -40,33 +43,47 @@ public class TaskDao {
         }
     }
 
+    public void clearTable() throws SQLException {
+        String sql = "DELETE FROM Tasks; DELETE FROM sqlite_sequence WHERE name = 'Tasks';";
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.execute();
+            statement.close();
+        }
+    }
+
     public void initializeTable() {
-        save(new Task(1, "Réviser DS de maths", "Séries numériques et probabilités.", false));
-        save(new Task(2, "Valider mon PIVE", "PIVE Club Poker.", true));
-        save(new Task(3, "Choisir mon parcours de 4A", "SIR ou SIA ?", false));
+        save(new TaskPostDTO("Réviser DS de maths", "Séries numériques et probabilités."));
+        save(new TaskPostDTO("Valider mon PIVE", "PIVE Club Poker."));
+        save(new TaskPostDTO("Choisir mon parcours de 4A", "SIR ou SIA ?"));
     }
 
     /**
      * Persist {@link Task} model.
-     * @param task task to save.
+     * @param taskDTO task to save.
      * @return task model.
      */
-    public Task save(Task task) {
+    public Task save(TaskPostDTO taskDTO) {
         String sql = """
                         INSERT INTO Tasks (title, description, done)
                         VALUES (?, ?, ?);""";
+        Task taskCreated = new Task(0, "", "", false);
 
         try (Connection connection = DriverManager.getConnection(databaseURL)){
             PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, task.title());
-            statement.setString(2, task.description());
-            statement.setBoolean(3, task.done());
+            statement.setString(1, taskDTO.title());
+            statement.setString(2, taskDTO.description());
+            statement.setBoolean(3, false);
             statement.execute();
+
+            taskCreated = findTaskByTitleDescDone(taskDTO.title(), taskDTO.description(), false).get();
+
         } catch (SQLException e) {
             log.error(e.getMessage());
         }
 
-        return task;
+        return taskCreated;
     }
 
     /**
@@ -85,6 +102,34 @@ public class TaskDao {
         try (Connection connection = DriverManager.getConnection(databaseURL)){
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            task = buildTaskModel(rs);
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        }
+        return task;
+    }
+
+    /**
+     * Retrieve {@link Task} by title, desc and done.
+     * @param title title of the {@link Task}.
+     * @param desc description of the {@link Task}.
+     * @param done done attribute of the {@link Task}.
+     * @return {@link Task} task model.
+     */
+    public Optional<Task> findTaskByTitleDescDone(String title, String desc, boolean done) {
+        String sql = """
+                        SELECT *
+                        FROM Tasks
+                        WHERE title = ? AND description = ? AND done = ?;
+                     """;
+        Optional<Task> task = Optional.empty();
+
+        try (Connection connection = DriverManager.getConnection(databaseURL)){
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, title);
+            statement.setString(2, desc);
+            statement.setBoolean(3, done);
             ResultSet rs = statement.executeQuery();
             task = buildTaskModel(rs);
         } catch (SQLException e) {

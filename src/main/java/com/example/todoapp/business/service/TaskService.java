@@ -2,6 +2,7 @@ package com.example.todoapp.business.service;
 
 import com.example.todoapp.business.model.Task;
 import com.example.todoapp.dao.TaskDao;
+import com.example.todoapp.dto.TaskPostDTO;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -10,9 +11,8 @@ public class TaskService {
 
     private final TaskDao taskDao = new TaskDao();
 
-    public Task createTask(Task input) {
-        Task newTask = new Task(input.id(), input.title(), input.description(), input.done());
-        return this.taskDao.save(newTask);
+    public Task createTask(TaskPostDTO input) {
+        return this.taskDao.save(input);
     }
 
     public Optional<Task> getTaskById(int id) {

@@ -3,6 +3,7 @@ package com.example.todoapp.presentation;
 import com.example.todoapp.JsonUtils;
 import com.example.todoapp.business.model.Task;
 import com.example.todoapp.business.service.TaskService;
+import com.example.todoapp.dto.TaskErrorDTO;
 import com.example.todoapp.dto.TaskPostDTO;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -42,6 +43,22 @@ public class TaskController implements HttpHandler {
             //region Manage POST /tasks
             if("POST".equals(method)) {
                 TaskPostDTO input = JsonUtils.deserialize(new String(exchange.getRequestBody().readAllBytes(), UTF_8), TaskPostDTO.class);
+
+                if (input.title() == null || input.title().isEmpty()) {
+                    TaskErrorDTO error = new TaskErrorDTO("title", "Title should not be empty.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
+                if (input.title() != null && input.title().length() > 50) {
+                    TaskErrorDTO error = new TaskErrorDTO("title", "Title should not exceed 50 characters.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
+                if ( input.description() !=null && input.description().length() > 255 ) {
+                    TaskErrorDTO error = new TaskErrorDTO("description", "Description should not exceed 255 characters.");
+                    sendResponse(exchange, 400, JsonUtils.serialize(error));
+                }
+
                 Task createdTask = this.taskService.createTask(input);
 
                 exchange.getResponseHeaders().add("Location", "/tasks/" + createdTask.id());
